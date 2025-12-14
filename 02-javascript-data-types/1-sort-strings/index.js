@@ -7,12 +7,11 @@
 export function sortStrings(arr, param = 'asc') {
   //создаём новый массив
   const sorted = [...arr];
+  const multiplier = param === 'asc' ? 1 : -1;
 
   // Сортируем с учетом русской и английской локалей
-  sorted.sort((a, b) => a.localeCompare(b, ['ru', 'en'], {
+  sorted.sort((a, b) => a.localeCompare(b, ['ru', 'en'] * multiplier, {
     caseFirst: 'upper', // Заглавные буквы идут первыми
-    sensitivity: 'variant', // Учитываем регистр и диакритические знаки
-    usage: 'sort',
   }));
 
   return param === 'asc' ? sorted : sorted.reverse();
