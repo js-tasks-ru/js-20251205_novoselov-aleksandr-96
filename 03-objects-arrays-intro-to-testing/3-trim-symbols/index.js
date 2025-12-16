@@ -11,18 +11,25 @@ export function trimSymbols(string, size) {
     return string;
   }
 
-  let counter = 0;
   let result = '';
+  let currentSymbol = null;
+  let count = 0;
 
-  while (counter < string.length) {
-    const currentSymbol = string[counter];
-    let count = 0;
-		
-    while (counter < string.length && string[counter] === currentSymbol) {
-      counter++;
+  for (let i = 0; i < string.length; i++) {
+    const symbol = string[i];
+
+    if (symbol === currentSymbol) {
       count++;
+    } else {
+      if (currentSymbol !== null) {
+        result += currentSymbol.repeat(Math.min(count, size));
+      }
+      currentSymbol = symbol;
+      count = 1;
     }
-		
+  }
+
+  if (currentSymbol !== null) {
     result += currentSymbol.repeat(Math.min(count, size));
   }
 
