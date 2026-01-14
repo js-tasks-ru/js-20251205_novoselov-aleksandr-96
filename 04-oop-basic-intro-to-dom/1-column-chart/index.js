@@ -14,10 +14,15 @@ export default class ColumnChart extends Component {
     this.#value = value ?? this.#value;
     this.#link = link ?? this.#link;
 
-    this.#render();
+    this.render();
   }
 
-  #template() {
+  update(data) {
+    this.#data = data;
+    this.render();
+  }
+
+  template() {
     return this.#data?.length === 0 
       ? ` <div class="column-chart column-chart_loading" style="--chart-height: 50">
             <div class="column-chart__title">
@@ -47,7 +52,7 @@ export default class ColumnChart extends Component {
     `;
   }
 
-  #render() {
-    this.html = this.#template();
+  render() {
+    this.html = this.template();
   }
 }
