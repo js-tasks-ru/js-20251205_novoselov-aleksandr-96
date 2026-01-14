@@ -40,7 +40,7 @@ export default class ColumnChart extends Component {
             <div class="column-chart__container">
               <div data-element="header" class="column-chart__header">${this.#value}</div>
               <div data-element="body" class="column-chart__chart">
-              ${this.#data.map(value => `<div style="--value: ${value}" data-tooltip="${value * 2}%"></div>`) .join('\n')}
+              ${this.#data.map(value => `<div style="--value: ${value / 2}" data-tooltip="${value}%"></div>`) .join('\n')}
               </div>
             </div>
           </div>
