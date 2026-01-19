@@ -36,7 +36,7 @@ export default class ColumnChart extends Component {
             </div>
             <div class="column-chart__container">
               <div data-element="header" class="column-chart__header">
-                344
+                ${this.#value}
               </div>
               <div data-element="body" class="column-chart__chart">
               </div>
