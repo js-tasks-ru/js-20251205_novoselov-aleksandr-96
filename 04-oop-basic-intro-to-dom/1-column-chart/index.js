@@ -13,11 +13,11 @@ export default class ColumnChart extends Component {
 
     const { data = [], label = '', value = 0, link = '#', formatHeading = data => data} = options;
 
-    this.#data = data ?? this.#data;
-    this.#label = label ?? this.#label;
-    this.#value = value ?? this.#value;
-    this.#link = link ?? this.#link;
-    this.#formatHeading = formatHeading ?? this.#formatHeading;
+    this.#data = data;
+    this.#label = label;
+    this.#value = value;
+    this.#link = link;
+    this.#formatHeading = formatHeading;
 
     this.render();
   }
