@@ -1,5 +1,7 @@
 import { Component } from '../../components/component.js';
 export default class NotificationMessage extends Component {
+    static currentNotification = null;
+
     #message = '';
     duration = 2000;
     #type = 'success';
@@ -19,6 +21,12 @@ export default class NotificationMessage extends Component {
     }
 
     show(target = document.body) {
+      if (NotificationMessage.currentNotification) {
+        NotificationMessage.currentNotification.remove();
+      }
+
+      NotificationMessage.currentNotification = this;
+
       target.append(this.element);
       setTimeout(() => this.remove(), this.duration);
     }
