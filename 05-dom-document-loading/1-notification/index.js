@@ -5,6 +5,7 @@ export default class NotificationMessage extends Component {
     #message = '';
     duration = 2000;
     #type = 'success';
+    #timerId = null
 
     constructor(message = '', { duration = 2000, type = 'success'} = {}) {
       super();
@@ -21,6 +22,10 @@ export default class NotificationMessage extends Component {
     }
 
     show(target = document.body) {
+      if (this.#timerId) {
+        clearTimeout(this.#timerId);
+      }
+
       if (NotificationMessage.currentNotification) {
         NotificationMessage.currentNotification.remove();
       }
@@ -28,7 +33,7 @@ export default class NotificationMessage extends Component {
       NotificationMessage.currentNotification = this;
 
       target.append(this.element);
-      setTimeout(() => this.remove(), this.duration);
+      this.#timerId = setTimeout(() => NotificationMessage.currentNotification.remove(), this.duration);
     }
 
     template() {

@@ -17,7 +17,9 @@ export class Component {
     }
 
     remove() {
-      this.#element.remove();
+      if (this.#element) {
+        this.#element.remove();
+      }
     }
 
     destroy() {
