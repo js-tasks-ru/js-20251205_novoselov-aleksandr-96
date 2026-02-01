@@ -16,11 +16,12 @@ export default class NotificationMessage extends Component {
 
     show() {
       document.body.append(this.element);
+      setTimeout(() => this.remove(), this.duration);
     }
 
     template() {
       return `
-        <div class="notification success" style="--value:${this.duration / 100}s">
+        <div class="notification success" style="--value:${this.duration}s">
             <div class="timer"></div>
             <div class="inner-wrapper">
             <div class="notification-header">${this.#type}</div>
