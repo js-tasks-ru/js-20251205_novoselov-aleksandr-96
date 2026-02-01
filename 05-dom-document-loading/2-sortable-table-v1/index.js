@@ -1,7 +1,9 @@
 import { Component } from "../../components/component.js";
+import { createElement } from "../../utils/helper.js";
 export default class SortableTable extends Component {
   #headerConfig = [];
   #data = [];
+  #arrow = null;
 
   constructor(headerConfig = [], data = []) {
     super();
@@ -10,6 +12,7 @@ export default class SortableTable extends Component {
     this.#data = data;
 
     this.render();
+    this.#createArrow();
   }
 
   #headerColumns() {
@@ -17,9 +20,6 @@ export default class SortableTable extends Component {
       ${this.#headerConfig.map(column => `
         <div class="sortable-table__cell" data-id="${column.id}" data-sortable="${column.sortable}">
           <span>${column.title}</span>
-          <span data-element="arrow" class="sortable-table__sort-arrow">
-            <span class="sort-arrow"></span>
-          </span>
         </div>
       `).join('\n')}
     `; 
@@ -34,6 +34,24 @@ export default class SortableTable extends Component {
         return cell.template ? cell.template(cellData) : `<div class="sortable-table__cell">${cellData}</div>`;
       }).join('\n')
     ).join('\n')}`;
+  }
+
+  sort(fieldValue, orderValue) {
+    const headerCell = document.querySelector(`.sortable-table__cell[ data-id="${fieldValue}"]`);
+    headerCell.dataset.order = orderValue;
+    headerCell.append(this.#arrow);
+  }
+
+  #arrowTemplate() {
+    return `
+      <span data-element="arrow" class="sortable-table__sort-arrow">
+        <span class="sort-arrow"></span>
+      </span>
+    `;
+  }
+
+  #createArrow() {
+    this.#arrow = createElement(this.#arrowTemplate());
   }
 
   template() {
