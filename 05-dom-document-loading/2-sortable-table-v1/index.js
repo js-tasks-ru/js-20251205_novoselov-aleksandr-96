@@ -13,7 +13,7 @@ export default class SortableTable extends Component {
   }
 
   #headerColumns() {
-    return this.#headerConfig?.lenght === 0 ? `` : `
+    return this.#headerConfig?.length === 0 ? `` : `
       ${this.#headerConfig.map(column => `
         <div class="sortable-table__cell" data-id="${column.id}" data-sortable="${column.sortable}" data-order="asc">
           <span>${column.title}</span>
