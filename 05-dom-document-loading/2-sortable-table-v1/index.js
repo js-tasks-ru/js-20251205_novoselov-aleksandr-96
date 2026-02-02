@@ -5,6 +5,7 @@ export default class SortableTable extends Component {
   #data = [];
   #arrow = null;
   #bodyElement = null;
+  subElements = {}
 
   constructor(headerConfig = [], data = []) {
     super();
@@ -15,6 +16,7 @@ export default class SortableTable extends Component {
     this.render();
     this.#bodyElement = this.element.querySelector('[data-element="body"]');
     this.#createArrow();
+    this.initSubElements();
   }
 
   #headerColumns() {
@@ -41,12 +43,12 @@ export default class SortableTable extends Component {
     ).join('\n')}`;
   }
 
-  get subElements() {
+  initSubElements() {
     const result = {};
     this.element.querySelectorAll('[data-element]').forEach(el => {
       result[el.dataset.element] = el;
     });
-    return result;
+    this.subElements = result;
   }
 
   sort(fieldValue, orderValue) {
