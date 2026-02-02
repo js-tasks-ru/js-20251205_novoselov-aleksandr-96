@@ -1,9 +1,10 @@
 import { Component } from "../../components/component.js";
-import { createElement } from "../../utils/helper.js";
+import { createElement, sortObjects } from "../../utils/helper.js";
 export default class SortableTable extends Component {
   #headerConfig = [];
   #data = [];
   #arrow = null;
+  #bodyElement = null;
 
   constructor(headerConfig = [], data = []) {
     super();
@@ -27,12 +28,15 @@ export default class SortableTable extends Component {
 
   #bodyColumns() {
     return this.#headerConfig?.length === 0 || this.#data?.length === 0 ? `` : `
-      ${this.#data.map(row => 
-      this.#headerConfig.map(cell => {
-        const cellData = row[cell.id];
-          
-        return cell.template ? cell.template(cellData) : `<div class="sortable-table__cell">${cellData}</div>`;
-      }).join('\n')
+      ${this.#data.map(row => `
+        <a href="${row.images?.[0]?.url}" class="sortable-table__row">
+          ${this.#headerConfig.map(cell => {
+  const cellData = row[cell.id];
+              
+  return cell.template ? cell.template(cellData) : `<div class="sortable-table__cell">${cellData}</div>`;
+}).join('\n')}
+        </a>
+      `
     ).join('\n')}`;
   }
 
@@ -40,6 +44,12 @@ export default class SortableTable extends Component {
     const headerCell = document.querySelector(`.sortable-table__cell[ data-id="${fieldValue}"]`);
     headerCell.dataset.order = orderValue;
     headerCell.append(this.#arrow);
+    const sortType = this.#headerConfig.find(Item => Item.id === fieldValue)?.sortType;
+
+    this.#data = sortObjects(this.#data, fieldValue, sortType, orderValue);
+
+    this.#bodyElement.innerHTML = this.#bodyColumns();
+    
   }
 
   #arrowTemplate() {
@@ -73,6 +83,7 @@ export default class SortableTable extends Component {
 
   render() {
     this.html = this.template();
+    this.#bodyElement = this.element.querySelector('[data-element="body"]');
   }
 }
 
