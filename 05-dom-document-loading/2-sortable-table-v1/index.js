@@ -13,6 +13,7 @@ export default class SortableTable extends Component {
     this.#data = data;
 
     this.render();
+    this.#bodyElement = this.element.querySelector('[data-element="body"]');
     this.#createArrow();
   }
 
@@ -29,19 +30,27 @@ export default class SortableTable extends Component {
   #bodyColumns() {
     return this.#headerConfig?.length === 0 || this.#data?.length === 0 ? `` : `
       ${this.#data.map(row => `
-        <a href="${row.images?.[0]?.url}" class="sortable-table__row">
+        <a class="sortable-table__row">
           ${this.#headerConfig.map(cell => {
-  const cellData = row[cell.id];
+      const cellData = row[cell.id];
               
-  return cell.template ? cell.template(cellData) : `<div class="sortable-table__cell">${cellData}</div>`;
-}).join('\n')}
+      return cell.template ? cell.template(cellData) : `<div class="sortable-table__cell">${cellData}</div>`;
+    }).join('\n')}
         </a>
       `
     ).join('\n')}`;
   }
 
+  get subElements() {
+    const result = {};
+    this.element.querySelectorAll('[data-element]').forEach(el => {
+      result[el.dataset.element] = el;
+    });
+    return result;
+  }
+
   sort(fieldValue, orderValue) {
-    const headerCell = document.querySelector(`.sortable-table__cell[ data-id="${fieldValue}"]`);
+    const headerCell = document.querySelector(`.sortable-table__cell[data-id="${fieldValue}"]`);
     headerCell.dataset.order = orderValue;
     headerCell.append(this.#arrow);
     const sortType = this.#headerConfig.find(Item => Item.id === fieldValue)?.sortType;
@@ -72,9 +81,7 @@ export default class SortableTable extends Component {
             ${this.#headerColumns()}
           </div>
           <div data-element="body" class="sortable-table__body">
-            <a href="/products/3d-ochki-epson-elpgs03" class="sortable-table__row">
               ${this.#bodyColumns()}
-            </a>
           </div>
         </div>
       </div>
@@ -83,7 +90,6 @@ export default class SortableTable extends Component {
 
   render() {
     this.html = this.template();
-    this.#bodyElement = this.element.querySelector('[data-element="body"]');
   }
 }
 
