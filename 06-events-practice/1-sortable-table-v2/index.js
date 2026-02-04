@@ -3,6 +3,7 @@ import { createElement, sortObjects } from "../../utils/helper.js";
 export default class SortableTable extends Component {
   #headerConfig = [];
   #data = [];
+  #sorted = {};
   #arrow = null;
   #bodyElement = null;
   subElements = {}
@@ -12,6 +13,7 @@ export default class SortableTable extends Component {
 
     this.#headerConfig = headerConfig;
     this.#data = data;
+    this.#sorted = sorted;
 
     this.render();
     this.#bodyElement = this.element.querySelector('[data-element="body"]');
