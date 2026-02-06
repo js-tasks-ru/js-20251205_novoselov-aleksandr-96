@@ -4,10 +4,11 @@ export default class SortableTable extends Component {
   #headerConfig = [];
   #data = [];
   #sorted = {};
-  isSortLocally = true;
+  #isSortLocally = true;
   #arrow = null;
   #bodyElement = null;
   subElements = {}
+  #header = null;
 
   constructor(headerConfig = [], {data = [], sorted = {}} = {}, isSortLocally = true) {
     super();
@@ -15,18 +16,23 @@ export default class SortableTable extends Component {
     this.#headerConfig = headerConfig;
     this.#data = data;
     this.#sorted = sorted;
-    this.isSortLocally = isSortLocally;
+    this.#isSortLocally = isSortLocally;
 
     this.render();
     this.#bodyElement = this.element.querySelector('[data-element="body"]');
+    this.#header = this.element.querySelector('[data-element="header"]');
     this.#createArrow();
-    this.initSubElements();
+    this.#initSubElements();
+
+    this.sort();
+
+    this.#initListeners();
   }
 
   #headerColumns() {
     return this.#headerConfig?.length === 0 ? `` : `
       ${this.#headerConfig.map(column => `
-        <div class="sortable-table__cell" data-id="${column.id}" data-sortable="${column.sortable}">
+        <div class="sortable-table__cell" data-id="${column.id}" data-sortable="${column.sortable}" data-order="asc">
           <span>${column.title}</span>
         </div>
       `).join('\n')}
@@ -47,7 +53,7 @@ export default class SortableTable extends Component {
     ).join('\n')}`;
   }
 
-  initSubElements() {
+  #initSubElements() {
     const result = {};
     this.element.querySelectorAll('[data-element]').forEach(el => {
       result[el.dataset.element] = el;
@@ -55,13 +61,61 @@ export default class SortableTable extends Component {
     this.subElements = result;
   }
 
-  sort(fieldValue, orderValue) {
+  #initListeners() {
+    this.#header.addEventListener('pointerdown', this.headerClickHandler);
+  }
+
+  sort = (userSort = null) => {
+    if (this.#isSortLocally) {
+      this.#sortOnClient(userSort);
+    } else {
+      this.#sortOnServer();
+    }
+  }
+
+  #sortOnClient(userSort = null) {
+    const order = this.#sorted.order;
+    const id = this.#sorted.id;
+    const sortable = this.#headerConfig.find(item => item.id === this.#sorted.id)?.sortable;
+
+    if (id && order && sortable) {
+      this.sortHandler(id, order, userSort);
+    }
+  }
+
+  #sortOnServer() {
+
+  }
+
+  headerClickHandler = (event) => {
+    const cell = event.target.closest('.sortable-table__cell[data-sortable="true"]');
+    
+    if (cell) {
+      const id = cell.dataset.id;
+      const order = cell.dataset.order === 'asc' ? 'desc' : 'asc';
+      const sorted = {
+        id,
+        order,
+        sortable: true,
+      };
+
+      this.#sorted = sorted;
+      
+      this.sort();
+    }
+  }
+
+  sortHandler(fieldValue, orderValue, userSort = null) {
     const headerCell = this.element.querySelector(`.sortable-table__cell[data-id="${fieldValue}"]`);
     headerCell.dataset.order = orderValue;
     headerCell.append(this.#arrow);
     const sortType = this.#headerConfig.find(Item => Item.id === fieldValue)?.sortType;
 
-    this.#data = sortObjects(this.#data, fieldValue, sortType, orderValue);
+    if (userSort) {
+      this.#data.sort(userSort);
+    } else {
+      this.#data = sortObjects(this.#data, fieldValue, sortType, orderValue);
+    }
 
     this.#bodyElement.innerHTML = this.#bodyColumns();
     
@@ -98,4 +152,3 @@ export default class SortableTable extends Component {
     this.html = this.template();
   }
 }
-
