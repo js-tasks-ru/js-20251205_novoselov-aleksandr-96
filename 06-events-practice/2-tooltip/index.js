@@ -14,7 +14,7 @@ class Tooltip extends Component {
   }
 
   pointerOverHandler = event => {
-    const dataTooltipElem = event.target.closest('[data-tooltip="foo"]');
+    const dataTooltipElem = event.target.closest('[data-tooltip]');
     if (!dataTooltipElem) {return;}
 
     const text = dataTooltipElem.dataset.tooltip;
@@ -29,7 +29,7 @@ class Tooltip extends Component {
   }
 
   pointerOutHandler = event => {
-    const dataTooltipElem = event.target?.closest('[data-tooltip="foo"]');
+    const dataTooltipElem = event.target?.closest('[data-tooltip]');
     if (!dataTooltipElem) {return;}
 
     this.remove();
