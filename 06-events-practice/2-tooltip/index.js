@@ -1,28 +1,54 @@
 import { Component } from "../../components/component.js";
 
 class Tooltip extends Component {
-  static #onlyInstance = null;
+  #tooltipText = '';
 
   constructor() {
     super();
-
-    if (!Tooltip.#onlyInstance) {
-      Tooltip.#onlyInstance = this;
-    } else {
-      return Tooltip.#onlyInstance;
-    }
   }
 
-  initialize () {
 
+  initialize () {
+    document.addEventListener('pointerover', this.pointerOverHandler);
+    document.addEventListener('pointerout', this.pointerOutHandler);
+  }
+
+  pointerOverHandler = event => {
+    const dataTooltipElem = event.target.closest('[data-tooltip="foo"]');
+    if (!dataTooltipElem) {return;}
+
+    const text = dataTooltipElem.dataset.tooltip;
+    this.render(text);
+  
+    document.addEventListener('pointermove', this.pointerMoveHandler);
+  }
+
+  pointerMoveHandler = event => {
+    this.element.style.left = `${event.clientX + 10}px`;
+    this.element.style.top = `${event.clientY + 10}px`;
+  }
+
+  pointerOutHandler = event => {
+    const dataTooltipElem = event.target?.closest('[data-tooltip="foo"]');
+    if (!dataTooltipElem) {return;}
+
+    this.remove();
+
+    document.removeEventListener('pointermove', this.pointerMoveHandler);
   }
 
   #template() {
-
+    return `<div class="tooltip">${this.#tooltipText}</div>`;
   }
 
-  #render() {
+  render(text = '') {
+    this.#tooltipText = text;
+
     this.html = this.#template();
+
+    if (this.element && !document.body.contains(this.element)) {
+      document.body.append(this.element);
+    }
   }
 }
 export default Tooltip;
