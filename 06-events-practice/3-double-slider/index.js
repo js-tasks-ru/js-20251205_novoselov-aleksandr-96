@@ -105,6 +105,21 @@ export default class DoubleSlider extends Component {
 
       leftRelative = Math.max(0, Math.min(1, leftRelative)); // Ограничиваем диапазон
 
+      // Получаем текущие позиции слайдеров в процентах
+      const leftThumbLeft = parseFloat(this.#leftThumb.style.left) || 0;
+      const rightThumbLeft = parseFloat(this.#rightThumb.style.left) || 100;
+
+      // Ограничиваем движение, чтобы слайдеры не пересекались
+      if (direction === 'left') {
+        // Левый слайдер не может пройти дальше правого
+        const maxLeftPercent = rightThumbLeft;
+        leftRelative = Math.min(leftRelative, maxLeftPercent / 100);
+      } else {
+        // Правый слайдер не может пройти дальше левого
+        const minLeftPercent = leftThumbLeft;
+        leftRelative = Math.max(leftRelative, minLeftPercent / 100);
+      }
+
       let leftPercents = leftRelative * 100;
       thumb.style.left = `${leftPercents}%`;
 
