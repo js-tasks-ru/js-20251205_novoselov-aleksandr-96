@@ -30,6 +30,8 @@ export default class DoubleSlider extends Component {
       this.#fromValueElement = this.element.querySelector('span[data-element="from"]');
       this.#toValueElement = this.element.querySelector('span[data-element="to"]');
       this.#initListeners();
+      
+      this.#updateSliderPositions();
     }
 
     #template() {
@@ -60,6 +62,27 @@ export default class DoubleSlider extends Component {
 
       this.#leftThumb.addEventListener('pointerdown', this.#onLeftThumbPointerDown);
       this.#rightThumb.addEventListener('pointerdown', this.#onRightThumbPointerDown);
+    }
+
+    #updateSliderPositions() {
+      // Предотвращаем деление на ноль
+      const range = this.max - this.min;
+      if (range === 0) {
+        this.#leftThumb.style.left = '0%';
+        this.#rightThumb.style.left = '0%';
+        this.#updateProgress();
+        return;
+      }
+
+      // Вычисляем проценты для текущих значений
+      const leftPercent = ((this.#from - this.min) / range) * 100;
+      const rightPercent = ((this.#to - this.min) / range) * 100;
+
+      // Ограничиваем значения в пределах 0-100%
+      this.#leftThumb.style.left = `${Math.max(0, Math.min(100, leftPercent))}%`;
+      this.#rightThumb.style.left = `${Math.max(0, Math.min(100, rightPercent))}%`;
+
+      this.#updateProgress();
     }
 
     #onLeftThumbPointerDown = event => {
@@ -149,7 +172,7 @@ export default class DoubleSlider extends Component {
     }
 
     #updateProgress() {
-      if (!this.#progress || !this.#leftThumb || !this.#rightThumb) {return;}
+      if (!this.element || !this.#progress || !this.#leftThumb || !this.#rightThumb) {return;}
       
       const leftPercent = parseFloat(this.#leftThumb.style.left) || 0;
       const rightPercent = parseFloat(this.#rightThumb.style.left) || 100;
