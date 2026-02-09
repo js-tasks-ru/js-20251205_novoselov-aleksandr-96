@@ -1,8 +1,9 @@
 import { Component } from "../../components/component.js";
+
 export default class DoubleSlider extends Component {
     #leftThumb = null;
     #rightThumb = null;
-    #progress = null
+    #progress = null;
     #fromValueElement = null;
     #toValueElement = null;
     min = 0;
@@ -90,7 +91,6 @@ export default class DoubleSlider extends Component {
     }
 
     #onThumbPointerMove = (event, direction) => {
-      event.preventDefault(); // Предотвращаем выделение
       if (!this.element) { return; }
 
       const thumb = direction === 'left'
@@ -109,23 +109,25 @@ export default class DoubleSlider extends Component {
       thumb.style.left = `${leftPercents}%`;
 
       const approximateValue = leftRelative * (this.max - this.min) + this.min;
-      // this.#progress.style.width = `${leftPercents}%`;
 
       if (direction === 'left') {
         this.#leftThumbValueChangeHandler(Math.round(approximateValue));
       } else {
         this.#rightThumbValueChangeHandler(Math.round(approximateValue));
       }
-    };
-
+      
+      this.#updateProgress();
+    }
 
     #leftThumbValueChangeHandler = value => {
-      this.#from = value;
+      // Ограничиваем, чтобы не пересекался с правым слайдером
+      this.#from = Math.min(value, this.#to);
       this.#fromValueElement.innerHTML = this.#formatValue(this.#from);
     }
 
     #rightThumbValueChangeHandler = value => {
-      this.#to = value;
+      // Ограничиваем, чтобы не пересекался с левым слайдером
+      this.#to = Math.max(value, this.#from);
       this.#toValueElement.innerHTML = this.#formatValue(this.#to);
     }
 
