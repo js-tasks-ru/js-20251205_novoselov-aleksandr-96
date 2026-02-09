@@ -22,8 +22,8 @@ export default class DoubleSlider extends Component {
     
       this.min = min;
       this.max = max;
-      this.#from = selected.from ?? min;
-      this.#to = selected.to ?? max;
+      this.#from = Math.min(selected.from ?? min, max);
+      this.#to = Math.max(selected.to ?? max, min);
       this.#formatValue = formatValue;
 
       this.#render();
@@ -63,13 +63,14 @@ export default class DoubleSlider extends Component {
     }
 
     #onLeftThumbPointerDown = event => {
-      event.preventDefault(); // Предотвращаем выделение
+      event.preventDefault();
       
       const moveHandler = event => this.#onThumbPointerMove(event, 'left');
       const upHandler = () => {
         document.removeEventListener('pointermove', moveHandler);
         document.removeEventListener('pointerup', upHandler);
         this.#updateProgress();
+        this.#dispatchRangeSelectEvent();
       };
       
       document.addEventListener('pointermove', moveHandler);
@@ -77,13 +78,14 @@ export default class DoubleSlider extends Component {
     }
 
     #onRightThumbPointerDown = event => {
-      event.preventDefault(); // Предотвращаем выделение
+      event.preventDefault();
       
       const moveHandler = event => this.#onThumbPointerMove(event, 'right');
       const upHandler = () => {
         document.removeEventListener('pointermove', moveHandler);
         document.removeEventListener('pointerup', upHandler);
         this.#updateProgress();
+        this.#dispatchRangeSelectEvent();
       };
       
       document.addEventListener('pointermove', moveHandler);
@@ -153,6 +155,15 @@ export default class DoubleSlider extends Component {
       const rightPercent = parseFloat(this.#rightThumb.style.left) || 100;
       
       this.#progress.style.left = `${leftPercent}%`;
-      this.#progress.style.width = `${rightPercent - leftPercent}%`;
+      this.#progress.style.width = `${Math.max(0, rightPercent - leftPercent)}%`;
+    }
+
+    #dispatchRangeSelectEvent() {
+      if (!this.element) {return;}
+
+      this.element.dispatchEvent(new CustomEvent('range-select', {
+        detail: { from: this.#from, to: this.#to },
+        bubbles: true
+      }));
     }
 }
