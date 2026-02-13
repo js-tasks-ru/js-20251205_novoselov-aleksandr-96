@@ -7,9 +7,17 @@ export class Component {
     }
 
     set html(content) {
-      const elem = document.createElement(this.#tagname);
-      elem.innerHTML = content?.trim();
-      this.#element = elem.firstElementChild;
+      const wrapper = document.createElement(this.#tagname);
+      const contentTrimmed = content?.trim() || '';
+      wrapper.innerHTML = contentTrimmed;
+      const elem = wrapper.firstElementChild;
+
+      if (this.#element && this.#element.parentNode) {
+        // Заменяем старый элемент новым в родителе
+        this.#element.parentNode.replaceChild(elem, this.#element);
+      }
+
+      this.#element = elem;
     }
 
     get element() {
