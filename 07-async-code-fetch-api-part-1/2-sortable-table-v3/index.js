@@ -119,6 +119,10 @@ export default class SortableTable extends Component {
     this.#header.addEventListener('pointerdown', this.headerClickHandler);
   }
 
+  #removeListeners() {
+    this.#header.removeEventListener('pointerdown', this.headerClickHandler);
+  }
+
   sort = (userSort = null) => {
     if (this.#isSortLocally) {
       this.#sortOnClient(userSort);
@@ -215,6 +219,6 @@ export default class SortableTable extends Component {
 
   destroy() {
     super.destroy();
-    this.#header.removeEventListener('pointerdown', this.headerClickHandler);
+    this.#removeListeners();
   }
 }
