@@ -212,4 +212,9 @@ export default class SortableTable extends Component {
   render() {
     this.html = this.template();
   }
+
+  destroy() {
+    super.destroy();
+    this.#header.removeEventListener('pointerdown', this.headerClickHandler);
+  }
 }
