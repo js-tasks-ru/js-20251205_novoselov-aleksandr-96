@@ -104,6 +104,13 @@ export default class ColumnChart extends Component {
   }
 
   render() {
+    const oldElement = this.element;
+
     this.html = this.template();
+
+    if (oldElement && oldElement.parentNode) {
+      // Заменяем старый элемент новым в родителе
+      oldElement.parentNode.replaceChild(this.element, oldElement);
+    }
   }
 }
