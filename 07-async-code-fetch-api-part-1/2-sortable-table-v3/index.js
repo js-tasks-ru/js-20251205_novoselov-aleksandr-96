@@ -73,14 +73,6 @@ export default class SortableTable extends Component {
 
    #toggleLoader = () => {
      this.#sortableTable.classList.toggle('.sortable-table_loading');
-
-   }
-
-   sortOnClient (id, order) {
-
-   }
-
-   sortOnServer (id, order) {
    }
 
   #headerColumns() {
@@ -123,26 +115,23 @@ export default class SortableTable extends Component {
     this.#header.removeEventListener('pointerdown', this.headerClickHandler);
   }
 
-  sort = (userSort = null) => {
+  sort = () => {
     if (this.#isSortLocally) {
-      this.#sortOnClient(userSort);
+      this.sortOnClient(this.#sorted.id, this.#sorted.order);
     } else {
-      this.#sortOnServer();
+      this.sortOnServer(this.#sorted.id, this.#sorted.order);
     }
   }
 
-  #sortOnClient(userSort = null) {
-    const order = this.#sorted.order;
-    const id = this.#sorted.id;
-    const sortable = this.#headerConfig.find(item => item.id === this.#sorted.id)?.sortable;
+  sortOnClient(id, order) {
+    const sortable = this.#headerConfig.find(item => item.id === id)?.sortable;
 
     if (id && order && sortable) {
-      this.sortHandler(id, order, userSort);
+      this.sortHandler(id, order);
     }
   }
 
-  #sortOnServer() {
-
+  sortOnServer (id, order) {
   }
 
   headerClickHandler = (event) => {
@@ -150,11 +139,11 @@ export default class SortableTable extends Component {
     
     if (cell) {
       const id = cell.dataset.id;
-      const order = cell.dataset.order === 'asc' ? 'desc' : 'asc';
+      const currentOrder = cell.dataset.order;
+      const order = currentOrder === 'asc' ? 'desc' : 'asc';
       const sorted = {
         id,
         order,
-        sortable: true,
       };
 
       this.#sorted = sorted;
