@@ -35,6 +35,7 @@ export default class SortableTable extends Component {
     this.#sortableTable = this.element.querySelector('.sortable-table');
     this.#createArrow();
     this.#initSubElements();
+    this.#initListeners();
 
     if (this.#url) {
       this.loadAndRenderData();
@@ -44,7 +45,6 @@ export default class SortableTable extends Component {
       this.sort();
     }
 
-    this.#initListeners();
   }
 
   async loadAndRenderData() {
@@ -64,7 +64,7 @@ export default class SortableTable extends Component {
       const data = await fetchJson(`${BACKEND_URL}/${this.#url}?${params}`);
   
       this.#data = data;
-      this.render();
+      this.#updateBodyColumns();
       this.arrowHandler(this.#sorted.id, this.#sorted.order);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -100,6 +100,10 @@ export default class SortableTable extends Component {
         </a>
       `
     ).join('\n')}`;
+  }
+
+  #updateBodyColumns = () => {
+    this.#bodyElement.innerHTML = this.#bodyColumns();
   }
 
   #initSubElements() {
