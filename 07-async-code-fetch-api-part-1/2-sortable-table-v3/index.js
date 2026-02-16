@@ -13,7 +13,7 @@ export default class SortableTable extends Component {
   #bodyElement = null;
   subElements = {}
   #sortableTable = null
-  #header = null;
+  #headerElement = null;
   #isLoading = false;
   #url = null;
   #start = 0;
@@ -31,7 +31,7 @@ export default class SortableTable extends Component {
 
     this.render();
     this.#bodyElement = this.element.querySelector('[data-element="body"]');
-    this.#header = this.element.querySelector('[data-element="header"]');
+    this.#headerElement = this.element.querySelector('[data-element="header"]');
     this.#sortableTable = this.element.querySelector('.sortable-table');
     this.#createArrow();
     this.#initSubElements();
@@ -115,11 +115,11 @@ export default class SortableTable extends Component {
   }
 
   #initListeners() {
-    this.#header.addEventListener('pointerdown', this.headerClickHandler);
+    this.#headerElement.addEventListener('pointerdown', this.headerClickHandler);
   }
 
   #removeListeners() {
-    this.#header.removeEventListener('pointerdown', this.headerClickHandler);
+    this.#headerElement.removeEventListener('pointerdown', this.headerClickHandler);
   }
 
   sort = () => {
