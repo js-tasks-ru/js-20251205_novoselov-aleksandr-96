@@ -273,18 +273,20 @@ export default class SortableTable extends Component {
 
   template() {
     return `
-      <div class="sortable-table">
-        <div data-element="header" class="sortable-table__header sortable-table__row">
-          ${this.#headerColumns()}
-        </div>
-        <div data-element="body" class="sortable-table__body">
-          ${this.#bodyColumns()}
-        </div>
-        <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
-        <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
-          <div>
-            <p>No products satisfies your filter criteria</p>
-            <button type="button" class="button-primary-outline">Reset all filters</button>
+      <div data-element="productsContainer" class="products-list__container">
+        <div class="sortable-table">
+          <div data-element="header" class="sortable-table__header sortable-table__row">
+            ${this.#headerColumns()}
+          </div>
+          <div data-element="body" class="sortable-table__body">
+            ${this.#bodyColumns()}
+          </div>
+          <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
+          <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
+            <div>
+              <p>No products satisfies your filter criteria</p>
+              <button type="button" class="button-primary-outline">Reset all filters</button>
+            </div>
           </div>
         </div>
       </div>
