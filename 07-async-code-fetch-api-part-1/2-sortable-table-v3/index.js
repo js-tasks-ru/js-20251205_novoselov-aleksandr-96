@@ -25,13 +25,12 @@ export default class SortableTable extends Component {
   constructor(headerConfig = [], {
     url = '',
     data = [],
-    sorted = { id: 'title', order: 'asc' },
     isSortLocally = false
   } = {}) {
     super();
     this.#headerConfig = headerConfig;
     this.#data = data;
-    this.#sorted = sorted;
+    this.#sorted = this.#headerConfig.find(item => item.sortable)?.id;
     this.#isSortLocally = isSortLocally;
     this.#url = url;
     this.#start = 0;
