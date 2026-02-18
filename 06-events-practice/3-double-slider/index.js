@@ -119,8 +119,8 @@ export default class DoubleSlider extends Component {
     if (!this.#isDragging) {return;}
 
     this.#isDragging = false;
-    this.element.removeEventListener('pointermove', this.#onPointerMove);
-    this.element.removeEventListener('pointerup', this.#onPointerUp);
+    document.removeEventListener('pointermove', this.#onPointerMove);
+    document.removeEventListener('pointerup', this.#onPointerUp);
 
     this.#dispatchRangeSelectEvent();
     this.#activeThumb = null;
