@@ -10,7 +10,7 @@ export default class SortableTable extends Component {
   subElements = {}
   #header = null;
 
-  constructor(headerConfig = [], {data = [], sorted = {}} = {}, isSortLocally = true) {
+  constructor(headerConfig = [], { data = [], sorted = {}, isSortLocally = true } = {}) {
     super();
 
     this.#headerConfig = headerConfig;
