@@ -10,7 +10,7 @@ export default class ProductForm extends Component {
   #subcategoriesSelect = null;
   #imagesList = null;
   subElements = {};
-  #deaultFields = [
+  #defaultFields = [
     'title',
     'description',
     'quantity',
@@ -108,7 +108,7 @@ export default class ProductForm extends Component {
   }
 
   #renderProductData(product) {
-    for (const field of this.#deaultFields) {
+    for (const field of this.#defaultFields) {
       const el = this.element.querySelector(`#${field}`);
       const value = product[field];
       if (el && value !== undefined) {
@@ -118,7 +118,6 @@ export default class ProductForm extends Component {
     
     // Рендерим изображения
     if (product.images?.length && this.#imagesList) {
-
       this.#imagesList.innerHTML = '';
       for (const image of product.images) {
         const li = document.createElement('li');
@@ -144,8 +143,63 @@ export default class ProductForm extends Component {
     }
   }
 
-  async render () {
-    const categoriesPromise = await fetchJson(`${BACKEND_URL}/api/rest/categories?_refs=subcategory`);
+  #getFormData() {
+    const data = {};
+    
+    // Собираем данные из полей формы
+    for (const field of this.#defaultFields) {
+      const el = this.element.querySelector(`#${field}`);
+      if (el) {
+        data[field] = el.value;
+      }
+    }
+    
+    // Собираем изображения
+    const images = [];
+    const imageItems = this.#imagesList?.querySelectorAll('.sortable-list__item') || [];
+
+    for (const item of imageItems) {
+      const urlInput = item.querySelector('input[name="url"]');
+      const sourceInput = item.querySelector('input[name="source"]');
+      if (urlInput?.value) {
+        images.push({
+          url: urlInput.value,
+          source: sourceInput?.value || ''
+        });
+      }
+    }
+    data.images = images;
+    
+    return data;
+  }
+
+  async save() {
+    const formData = this.#getFormData();
+    
+    const url = this.productId 
+      ? `${BACKEND_URL}/api/rest/products/${this.productId}`
+      : `${BACKEND_URL}/api/rest/products`;
+    
+    const method = this.productId ? 'PUT' : 'POST';
+    
+    const result = await fetchJson(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    
+    // Dispatch события в зависимости от режима
+    const eventName = this.productId ? 'product-updated' : 'product-saved';
+    this.element.dispatchEvent(new CustomEvent(eventName, {
+      bubbles: true,
+      detail: { id: this.productId || result?.id }
+    }));
+    
+    return result;
+  }
+
+  async render() {
+    const categoriesPromise = fetchJson(`${BACKEND_URL}/api/rest/categories?_refs=subcategory`);
     const productPromise = this.productId 
       ? fetchJson(`${BACKEND_URL}/api/rest/products/?id=${this.productId}`).then(data => data[0])
       : Promise.resolve(null);
