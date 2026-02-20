@@ -10,13 +10,13 @@ export default class ProductForm extends Component {
   #subcategoriesSelect = null;
   subElements = {};
   #deaultFields = [
-    { id: 'title', key: 'title' },
-    { id: 'description', key: 'description' },
-    { id: 'quantity', key: 'quantity' },
-    { id: 'subcategory', key: 'subcategory' },
-    { id: 'status', key: 'status' },
-    { id: 'price', key: 'price' },
-    { id: 'discount', key: 'discount' }
+    'title',
+    'description',
+    'quantity',
+    'subcategory',
+    'status',
+    'price',
+    'discount'
   ];
 
   constructor (productId) {
@@ -105,10 +105,10 @@ export default class ProductForm extends Component {
     }
   }
 
-  #renderProductData(product) {  
+  #renderProductData(product) {
     for (const field of this.#deaultFields) {
-      const el = this.element.querySelector(`#${field.id}`);
-      const value = product[field.key];
+      const el = this.element.querySelector(`#${field}`);
+      const value = product[field];
       if (el && value !== undefined) {
         el.value = value;
       }
