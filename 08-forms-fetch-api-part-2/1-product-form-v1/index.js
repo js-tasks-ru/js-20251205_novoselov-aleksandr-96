@@ -8,6 +8,7 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 export default class ProductForm extends Component {
   productId = null;
   #subcategoriesSelect = null;
+  #imagesList = null;
   subElements = {};
   #deaultFields = [
     'title',
@@ -27,6 +28,7 @@ export default class ProductForm extends Component {
     this.html = this.template();
     this.#subcategoriesSelect = this.element.querySelector('#subcategory');
     this.#initSubElements();
+    this.#imagesList = this.subElements.imageListContainer?.querySelector('.sortable-list');
   }
 
   template() {
@@ -115,16 +117,16 @@ export default class ProductForm extends Component {
     }
     
     // Рендерим изображения
-    if (product.images?.length) {
-      const list = this.subElements.imageListContainer?.querySelector('.sortable-list');
-      if (list) {
-        list.innerHTML = '';
-        for (const image of product.images) {
-          const li = document.createElement('li');
-          li.className = 'products-edit__imagelist-item sortable-list__item';
-          const url = image['url '] || image.url || '';
-          const source = image['source '] || image.source || '';
-          li.innerHTML = `
+    if (product.images?.length && this.#imagesList) {
+
+      this.#imagesList.innerHTML = '';
+      for (const image of product.images) {
+        const li = document.createElement('li');
+        li.className = 'products-edit__imagelist-item sortable-list__item';
+        const url = image.url;
+        const source = image.source;
+
+        li.innerHTML = `
             <input type="hidden" name="url" value="${escapeHtml(url)}">
             <input type="hidden" name="source" value="${escapeHtml(source)}">
             <span>
@@ -136,8 +138,8 @@ export default class ProductForm extends Component {
               <img src="icon-trash.svg" data-delete-handle alt="delete">
             </button>
           `;
-          list.appendChild(li);
-        }
+
+        this.#imagesList.appendChild(li);
       }
     }
   }
