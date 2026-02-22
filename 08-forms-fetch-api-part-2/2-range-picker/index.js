@@ -4,14 +4,11 @@ export default class RangePicker extends Component {
   from = null;
   to = null;
   isOpen = false;
-  
   currentMonth = null;
   currentYear = null;
-
   #rangepickerInput = null;
   #boundRangepickerClickHandler = null;
   #rangepickerSelector = null;
-  
   #boundSelectorClickHandler = null;
   #boundDocumentClickHandler = null;
 
@@ -19,7 +16,7 @@ export default class RangePicker extends Component {
     super();
     this.from = from ?? this.from;
     this.to = to ?? this.to;
-
+    
     // Инициализируем текущий месяц для отображения
     if (this.from) {
       this.currentMonth = this.from.getMonth();
@@ -66,7 +63,7 @@ export default class RangePicker extends Component {
   }
 
   rangepickerClickHandler(event) {
-    event.stopPropagation(); // Чтобы не сработал document click сразу
+    event.stopPropagation();
     this.isOpen = !this.isOpen;
     
     if (this.isOpen) {
@@ -88,7 +85,6 @@ export default class RangePicker extends Component {
     }
   }
 
-  // Единый обработчик для всех кликов внутри селектора (делегирование)
   selectorClickHandler(event) {
     const target = event.target;
 
@@ -108,11 +104,9 @@ export default class RangePicker extends Component {
 
     // Клик по дате
     const cell = target.closest('.rangepicker__cell');
-    if (cell && !cell.style.visibility === 'hidden') {
+    if (cell && !cell.classList.contains('rangepicker__cell--empty')) {
       event.stopPropagation();
       const day = parseInt(cell.textContent.trim(), 10);
-      
-      // Определяем месяц и год из родителя .rangepicker__calendar
       const calendar = cell.closest('.rangepicker__calendar');
       const month = parseInt(calendar.dataset.month, 10);
       const year = parseInt(calendar.dataset.year, 10);
@@ -122,30 +116,29 @@ export default class RangePicker extends Component {
   }
 
   selectDate(date) {
-    // Логика выбора диапазона
-    if (!this.from || (this.from && this.to)) {
-      // Начинаем новый выбор
+    if (!this.from && !this.to) {
+      // Нет выбора — устанавливаем from
       this.from = date;
-      this.to = null;
-    } else if (date < this.from) {
-      // Если выбрали дату раньше текущей from, то это новая from
-      this.from = date;
-      this.to = null;
-    } else if (date.getTime() === this.from.getTime()) {
-      // Кликнули ту же дату - сброс
-      this.from = null;
-      this.to = null;
+    } else if (this.from && !this.to) {
+      // Есть только from
+      if (date < this.from) {
+        // Дата раньше from — меняем их местами
+        this.to = this.from;
+        this.from = date;
+      } else {
+        // Дата такая же или позже — устанавливаем to
+        this.to = date;
+      }
     } else {
-      // Завершаем выбор
-      this.to = date;
+      // Есть полный диапазон — начинаем новый выбор
+      this.from = date;
+      this.to = null;
     }
 
-    // Обновляем input
     this.updateInput();
-    
-    // Перерисовываем календарь с новыми классами
     this.renderSelector();
-    
+
+    // Диспатчим событие только если выбран полный диапазон
     if (this.from && this.to) {
       this.element.dispatchEvent(new CustomEvent('date-select', {
         bubbles: true,
@@ -249,7 +242,7 @@ export default class RangePicker extends Component {
     
     // Пустые ячейки
     for (let i = 1; i < startDay; i++) {
-      cells.push(`<div class="rangepicker__cell" style="visibility: hidden"></div>`);
+      cells.push(`<div class="rangepicker__cell rangepicker__cell--empty"></div>`);
     }
     
     // Дни
