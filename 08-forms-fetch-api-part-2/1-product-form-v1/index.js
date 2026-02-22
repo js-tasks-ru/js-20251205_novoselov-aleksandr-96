@@ -47,7 +47,7 @@ export default class ProductForm extends Component {
   #initListeners() {
     this.#saveButton.addEventListener('click', this.#boundSave);
     this.#uploadButton.addEventListener('click', this.#boundUploadImage);
-    
+
     // Делегирование для кнопок удаления изображений
     this.subElements.imageListContainer.addEventListener('click', (event) => {
       if (event.target.closest('[data-delete-handle]')) {
@@ -261,16 +261,20 @@ export default class ProductForm extends Component {
 
     const formData = this.#getFormData();
     
-    const url = this.productId 
-      ? `${BACKEND_URL}/api/rest/products/${this.productId}`
-      : `${BACKEND_URL}/api/rest/products`;
+    const dataToSend = { ...formData };
+
+    if (this.productId) {
+      dataToSend.id = this.productId;
+    }
+
+    const url = `${BACKEND_URL}/api/rest/products`;
     
     const method = this.productId ? 'PATCH' : 'POST';
     
     const result = await fetchJson(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(dataToSend)
     });
     
     // Dispatch события в зависимости от режима
