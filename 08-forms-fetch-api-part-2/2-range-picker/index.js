@@ -198,8 +198,11 @@ export default class RangePicker extends Component {
   updateInput() {
     const spans = this.#rangepickerInput.querySelectorAll('span');
     if (spans.length >= 3) {
-      spans[0].textContent = this.from ? this.formatDate(this.from) : '';
-      spans[2].textContent = this.to ? this.formatDate(this.to) : '';
+    // Обновляем input только если выбраны обе даты
+      if (this.from && this.to) {
+        spans[0].textContent = this.formatDate(this.from);
+        spans[2].textContent = this.formatDate(this.to);
+      }
     }
   }
 
