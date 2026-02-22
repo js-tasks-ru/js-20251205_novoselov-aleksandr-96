@@ -223,8 +223,24 @@ export default class RangePicker extends Component {
   }
 
   renderSelector() {
-    if (!this.#rangepickerSelector) {return;}
+    if (!this.#rangepickerSelector) { return; }
     this.#rangepickerSelector.innerHTML = this.selectorTemplate();
+
+    const leftNav = this.#rangepickerSelector.querySelector('.rangepicker__selector-control-left');
+    const rightNav = this.#rangepickerSelector.querySelector('.rangepicker__selector-control-right');
+
+    if (leftNav) {
+      leftNav.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.switchMonths(-1);
+      });
+    }
+    if (rightNav) {
+      rightNav.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.switchMonths(1);
+      });
+    }
   }
 
   template() {
