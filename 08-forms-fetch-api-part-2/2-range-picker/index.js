@@ -120,8 +120,10 @@ export default class RangePicker extends Component {
       // Нет выбора — устанавливаем from
       this.from = date;
     } else if (this.from && !this.to) {
-      // Есть только from
-      if (date < this.from) {
+    // Есть только from
+      if (date.getTime() === this.from.getTime()) {
+        this.from = null;
+      } else if (date < this.from) {
         // Дата раньше from — меняем их местами
         this.to = this.from;
         this.from = date;
@@ -130,13 +132,13 @@ export default class RangePicker extends Component {
         this.to = date;
       }
     } else {
-      // Есть полный диапазон — начинаем новый выбор
+    // Есть полный диапазон — начинаем новый выбор
       this.from = date;
       this.to = null;
     }
 
     this.updateInput();
-    this.renderSelector();
+    this.updateSelection();
 
     // Диспатчим событие только если выбран полный диапазон
     if (this.from && this.to) {
@@ -145,6 +147,40 @@ export default class RangePicker extends Component {
         detail: { from: this.from, to: this.to }
       }));
     }
+  }
+
+  // Обновляем только классы выделения, не перерисовывая весь DOM
+  updateSelection() {
+    // Удаляем старые классы выделения
+    this.element.querySelectorAll('.rangepicker__selected-from, .rangepicker__selected-to, .rangepicker__selected-between').forEach(el => {
+      el.classList.remove('rangepicker__selected-from', 'rangepicker__selected-to', 'rangepicker__selected-between');
+    });
+
+    // Добавляем новые классы
+    const cells = this.element.querySelectorAll('.rangepicker__cell');
+    cells.forEach(cell => {
+      if (cell.classList.contains('rangepicker__cell--empty')) {return;}
+      
+      const day = parseInt(cell.textContent.trim(), 10);
+      const calendar = cell.closest('.rangepicker__calendar');
+      if (!calendar) {return;}
+      
+      const month = parseInt(calendar.dataset.month, 10);
+      const year = parseInt(calendar.dataset.year, 10);
+      const cellDate = new Date(year, month, day);
+
+      if (this.from && this.isSameDate(cellDate, this.from)) {
+        cell.classList.add('rangepicker__selected-from');
+      }
+      
+      if (this.to && this.isSameDate(cellDate, this.to)) {
+        cell.classList.add('rangepicker__selected-to');
+      }
+      
+      if (this.from && this.to && cellDate > this.from && cellDate < this.to) {
+        cell.classList.add('rangepicker__selected-between');
+      }
+    });
   }
 
   updateInput() {
