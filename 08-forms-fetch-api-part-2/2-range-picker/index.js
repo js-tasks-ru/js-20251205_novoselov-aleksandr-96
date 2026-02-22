@@ -102,21 +102,10 @@ export default class RangePicker extends Component {
       return;
     }
 
-    // Клик по дате или пустой ячейке
+    // Клик по дате
     const cell = target.closest('.rangepicker__cell');
     if (cell) {
       event.stopPropagation();
-      
-      // Если кликнули по пустой ячейке — выбираем первый день месяца
-      if (cell.classList.contains('rangepicker__cell--empty')) {
-        const calendar = cell.closest('.rangepicker__calendar');
-        if (calendar) {
-          const month = parseInt(calendar.dataset.month, 10);
-          const year = parseInt(calendar.dataset.year, 10);
-          this.selectDate(new Date(year, month, 1));
-        }
-        return;
-      }
       
       const day = parseInt(cell.textContent.trim(), 10);
       const calendar = cell.closest('.rangepicker__calendar');
@@ -169,8 +158,6 @@ export default class RangePicker extends Component {
     // Добавляем новые классы
     const cells = this.element.querySelectorAll('.rangepicker__cell');
     cells.forEach(cell => {
-      if (cell.classList.contains('rangepicker__cell--empty')) {return;}
-
       const day = parseInt(cell.textContent.trim(), 10);
       const calendar = cell.closest('.rangepicker__calendar');
       if (!calendar) {return;}
@@ -196,7 +183,7 @@ export default class RangePicker extends Component {
   updateInput() {
     const spans = this.#rangepickerInput.querySelectorAll('span');
     if (spans.length >= 3) {
-    // Обновляем input только если выбраны обе даты
+      // Обновляем input только если выбраны обе даты
       if (this.from && this.to) {
         spans[0].textContent = this.formatDate(this.from);
         spans[2].textContent = this.formatDate(this.to);
@@ -295,22 +282,11 @@ export default class RangePicker extends Component {
   }
 
   renderDateGrid(year, month) {
-    const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
     const daysInMonth = lastDayOfMonth.getDate();
 
-    // 0 - Вс, 1 - Пн, ..., 6 - Сб. Нам нужно Пн=1 ... Вс=7
-    let startDay = firstDayOfMonth.getDay();
-    startDay = startDay === 0 ? 7 : startDay;
-
     const cells = [];
 
-    // Пустые ячейки
-    for (let i = 1; i < startDay; i++) {
-      cells.push(`<div class="rangepicker__cell rangepicker__cell--empty"></div>`);
-    }
-
-    // Дни
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDate = new Date(year, month, day);
       const classes = ['rangepicker__cell'];
@@ -327,7 +303,11 @@ export default class RangePicker extends Component {
         classes.push('rangepicker__selected-between');
       }
 
-      cells.push(`<div class="${classes.join(' ')}">${day}</div>`);
+      // Вычисляем позицию в сетке: Пн=1, Вт=2, ..., Вс=7
+      const dayOfWeek = currentDate.getDay();
+      const col = dayOfWeek === 0 ? 7 : dayOfWeek;
+      
+      cells.push(`<div class="${classes.join(' ')}" style="grid-column: ${col}">${day}</div>`);
     }
 
     return cells.join('');
