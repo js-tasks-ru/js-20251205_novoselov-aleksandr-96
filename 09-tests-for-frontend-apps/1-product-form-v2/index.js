@@ -42,6 +42,8 @@ export default class ProductForm extends Component {
     this.#boundUploadImage = this.#uploadImage.bind(this);
 
     this.#initListeners();
+    
+    this.#initSortableList();
   }
 
   #initListeners() {
@@ -123,6 +125,18 @@ export default class ProductForm extends Component {
     }
   }
 
+  #initSortableList() {
+    // Создаем пустой SortableList
+    this.#sortableList = new SortableList({
+      items: []
+    });
+
+    // Вставляем SortableList в контейнер
+    const container = this.subElements.sortableListContainer;
+    container.innerHTML = '';
+    container.append(this.#sortableList.element);
+  }
+
   #renderCategories(categories) {
     this.#subcategoriesSelect.innerHTML = '';
     
@@ -145,33 +159,19 @@ export default class ProductForm extends Component {
       }
     }
     
-    // Рендерим изображения через SortableList
-    if (product?.images?.length) {
-      this.#renderImagesList(product.images);
-    } else {
-      // Создаем пустой SortableList
-      this.#renderImagesList([]);
-    }
+    // Обновляем список изображений в SortableList
+    const images = product?.images || [];
+    this.#updateImagesList(images);
   }
 
-  #renderImagesList(images) {
-    // Уничтожаем предыдущий экземпляр SortableList, если он был
-    if (this.#sortableList) {
-      this.#sortableList.destroy();
-    }
+  #updateImagesList(images) {
+    if (!this.#sortableList) {return;}
 
     // Создаем элементы для SortableList
     const items = images.map(image => this.#createImageElement(image.url, image.source));
 
-    // Создаем новый экземпляр SortableList
-    this.#sortableList = new SortableList({
-      items: items
-    });
-
-    // Вставляем SortableList в контейнер
-    const container = this.subElements.sortableListContainer;
-    container.innerHTML = '';
-    container.append(this.#sortableList.element);
+    // Используем метод updateItems для полной замены списка
+    this.#sortableList.updateItems(items);
   }
 
   #createImageElement(url, source) {
@@ -221,21 +221,11 @@ export default class ProductForm extends Component {
         const data = await response.json();
         
         if (data.success) {
-          // Добавляем новое изображение в SortableList
+          // Создаем элемент нового изображения
           const newImageElement = this.#createImageElement(data.data.link, file.name);
           
-          // Получаем текущие элементы SortableList
-          const currentItems = this.#sortableList.items;
-          
-          // Создаем новый SortableList с добавленным элементом
-          this.#sortableList.destroy();
-          this.#sortableList = new SortableList({
-            items: [...currentItems, newImageElement]
-          });
-          
-          const container = this.subElements.sortableListContainer;
-          container.innerHTML = '';
-          container.append(this.#sortableList.element);
+          // Добавляем его в SortableList с помощью метода addItem
+          this.#sortableList.addItem(newImageElement);
         } else {
           throw new Error('Failed to upload image');
         }
@@ -262,13 +252,13 @@ export default class ProductForm extends Component {
       }
     }
     
-    // Собираем изображения из SortableList
+    // Собираем изображения из SortableList используя его метод getItems
     const images = [];
     
     if (this.#sortableList) {
-      const imageItems = this.#sortableList.items;
+      const items = this.#sortableList.getItems();
       
-      for (const item of imageItems) {
+      for (const item of items) {
         const urlInput = item.querySelector('input[name="url"]');
         const sourceInput = item.querySelector('input[name="source"]');
         
@@ -303,20 +293,25 @@ export default class ProductForm extends Component {
     
     const method = this.productId ? 'PATCH' : 'PUT';
     
-    const result = await fetchJson(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dataToSend)
-    });
-    
-    // Dispatch события в зависимости от режима
-    const eventName = this.productId ? 'product-updated' : 'product-saved';
-    this.element.dispatchEvent(new CustomEvent(eventName, {
-      bubbles: true,
-      detail: { id: this.productId || result?.id }
-    }));
-    
-    return result;
+    try {
+      const result = await fetchJson(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      });
+      
+      // Dispatch события в зависимости от режима
+      const eventName = this.productId ? 'product-updated' : 'product-saved';
+      this.element.dispatchEvent(new CustomEvent(eventName, {
+        bubbles: true,
+        detail: { id: this.productId || result?.id }
+      }));
+      
+      return result;
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Ошибка сохранения товара');
+    }
   }
 
   async render() {
