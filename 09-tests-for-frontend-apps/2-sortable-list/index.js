@@ -15,6 +15,10 @@ export default class SortableList extends Component {
     this.#initListeners();
   }
 
+  get items() {
+    return this.#items;
+  }
+
   render() {
     this.html = `<ul class="sortable-list">${this.#template()}</ul>`;
   }
