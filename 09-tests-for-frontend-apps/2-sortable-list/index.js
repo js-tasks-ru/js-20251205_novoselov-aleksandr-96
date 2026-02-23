@@ -44,20 +44,25 @@ export default class SortableList extends Component {
 
   #onPointerDown(event) {
     const deleteHandle = event.target.closest('[data-delete-handle]');
-    const grabHandle = event.target.closest('[data-grab-handle]');
+    const dragHandle = event.target.closest('[data-grab-handle]');
 
     if (deleteHandle) {
       event.preventDefault();
+
       const item = deleteHandle.closest('.sortable-list__item');
+
       if (item) {
         item.remove();
       }
+
       return;
     }
 
-    if (grabHandle) {
+    if (dragHandle) {
       event.preventDefault();
-      const item = grabHandle.closest('.sortable-list__item');
+
+      const item = dragHandle.closest('.sortable-list__item');
+
       if (item) {
         this.#onDragStart(event, item);
       }
