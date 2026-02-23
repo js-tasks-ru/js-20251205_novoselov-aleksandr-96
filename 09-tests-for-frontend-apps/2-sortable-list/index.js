@@ -23,9 +23,8 @@ export default class SortableList extends Component {
 
   #template() {
     return this.#items.map(item => {
-      const clone = item.cloneNode(true);
-      clone.classList.add('sortable-list__item');
-      return clone.outerHTML;
+      item.classList.add('sortable-list__item');
+      return item.outerHTML;
     }).join('');
   }
 
