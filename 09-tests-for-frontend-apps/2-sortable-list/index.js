@@ -6,8 +6,6 @@ export default class SortableList extends Component {
   #placeholder = null;
   #dragOffsetY = 0;
   #boundOnPointerDown = null;
-  #onPointerMove = null;
-  #onPointerUp = null;
 
   constructor({ items = [] } = {}) {
     super();
@@ -84,54 +82,54 @@ export default class SortableList extends Component {
     this.#placeholder.style.height = `${rect.height}px`;
     item.parentNode.insertBefore(this.#placeholder, item.nextSibling);
 
-    this.#onPointerMove = (e) => {
-      if (!this.#draggingElement) {return;}
-
-      const y = e.clientY - this.#dragOffsetY;
-      this.#draggingElement.style.top = `${y}px`;
-
-      const items = Array.from(this.element.children).filter(
-        child => child !== this.#draggingElement && child !== this.#placeholder
-      );
-
-      for (const item of items) {
-        const rect = item.getBoundingClientRect();
-        const midY = rect.top + rect.height / 2;
-
-        if (y < midY) {
-          if (this.#placeholder.previousSibling !== item) {
-            this.element.insertBefore(this.#placeholder, item);
-          }
-          return;
-        }
-      }
-
-      if (this.#placeholder.nextSibling !== null) {
-        this.element.appendChild(this.#placeholder);
-      }
-    };
-
-    this.#onPointerUp = () => {
-      if (!this.#draggingElement) {return;}
-
-      this.#draggingElement.classList.remove('sortable-list__item_dragging');
-      this.#draggingElement.style.position = '';
-      this.#draggingElement.style.left = '';
-      this.#draggingElement.style.top = '';
-      this.#draggingElement.style.width = '';
-      this.#draggingElement.style.margin = '';
-
-      this.element.insertBefore(this.#draggingElement, this.#placeholder);
-      this.#placeholder.remove();
-
-      document.removeEventListener('pointermove', this.#onPointerMove);
-      document.removeEventListener('pointerup', this.#onPointerUp);
-
-      this.#draggingElement = null;
-      this.#placeholder = null;
-    };
-
     document.addEventListener('pointermove', this.#onPointerMove);
     document.addEventListener('pointerup', this.#onPointerUp);
   }
+
+  #onPointerMove = (e) => {
+    if (!this.#draggingElement) {return;}
+
+    const y = e.clientY - this.#dragOffsetY;
+    this.#draggingElement.style.top = `${y}px`;
+
+    const items = Array.from(this.element.children).filter(
+      child => child !== this.#draggingElement && child !== this.#placeholder
+    );
+
+    for (const item of items) {
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+
+      if (y < midY) {
+        if (this.#placeholder.previousSibling !== item) {
+          this.element.insertBefore(this.#placeholder, item);
+        }
+        return;
+      }
+    }
+
+    if (this.#placeholder.nextSibling !== null) {
+      this.element.appendChild(this.#placeholder);
+    }
+  };
+
+  #onPointerUp = () => {
+    if (!this.#draggingElement) {return;}
+
+    this.#draggingElement.classList.remove('sortable-list__item_dragging');
+    this.#draggingElement.style.position = '';
+    this.#draggingElement.style.left = '';
+    this.#draggingElement.style.top = '';
+    this.#draggingElement.style.width = '';
+    this.#draggingElement.style.margin = '';
+
+    this.element.insertBefore(this.#draggingElement, this.#placeholder);
+    this.#placeholder.remove();
+
+    document.removeEventListener('pointermove', this.#onPointerMove);
+    document.removeEventListener('pointerup', this.#onPointerUp);
+
+    this.#draggingElement = null;
+    this.#placeholder = null;
+  };
 }
