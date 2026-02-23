@@ -43,6 +43,87 @@ export default class SortableList extends Component {
     this.element.removeEventListener('pointerdown', this.#boundOnPointerDown);
   }
 
+  // Публичный метод для обновления всех элементов
+  updateItems(newItems) {
+    if (!Array.isArray(newItems)) {return;}
+    
+    // Очищаем текущий список
+    this.element.innerHTML = '';
+    
+    // Обновляем внутренний массив
+    this.#items = newItems;
+    
+    // Добавляем класс каждому элементу и вставляем в DOM
+    this.#items.forEach(item => {
+      item.classList.add('sortable-list__item');
+      this.element.appendChild(item);
+    });
+  }
+
+  // Публичный метод для добавления одного элемента
+  addItem(newItem) {
+    if (!newItem) {return;}
+    
+    newItem.classList.add('sortable-list__item');
+    this.element.appendChild(newItem);
+    this.#items.push(newItem);
+  }
+
+  // Публичный метод для добавления элемента в определенную позицию
+  insertItemAt(newItem, index) {
+    if (!newItem || index < 0 || index > this.#items.length) {return;}
+    
+    newItem.classList.add('sortable-list__item');
+    
+    if (index === this.#items.length) {
+      this.element.appendChild(newItem);
+    } else {
+      const referenceNode = this.element.children[index];
+      this.element.insertBefore(newItem, referenceNode);
+    }
+    
+    this.#items.splice(index, 0, newItem);
+  }
+
+  // Публичный метод для удаления элемента
+  removeItem(item) {
+    if (!item || !this.element.contains(item)) {return;}
+    
+    const index = Array.from(this.element.children).indexOf(item);
+    
+    if (index !== -1) {
+      // Удаляем из DOM
+      item.remove();
+      
+      // Удаляем из внутреннего массива
+      this.#items.splice(index, 1);
+    }
+  }
+
+  // Публичный метод для удаления элемента по индексу
+  removeItemAt(index) {
+    if (index >= 0 && index < this.element.children.length) {
+      const item = this.element.children[index];
+      
+      // Удаляем из DOM
+      item.remove();
+      
+      // Удаляем из внутреннего массива
+      this.#items.splice(index, 1);
+    }
+  }
+
+  // Публичный метод для получения всех элементов
+  getItems() {
+    return [...this.#items];
+  }
+
+  // Публичный метод для очистки списка
+  clearItems() {
+    this.element.innerHTML = '';
+    this.#items = [];
+  }
+
   #onPointerDown(event) {
     const deleteHandle = event.target.closest('[data-delete-handle]');
     const dragHandle = event.target.closest('[data-grab-handle]');
@@ -53,7 +134,7 @@ export default class SortableList extends Component {
       const item = deleteHandle.closest('.sortable-list__item');
 
       if (item) {
-        item.remove();
+        this.removeItem(item);
       }
 
       return;
@@ -115,12 +196,12 @@ export default class SortableList extends Component {
 
     // Если нашли элемент для вставки перед
     if (targetElement) {
-    // Вставляем плейсхолдер перед найденным элементом
+      // Вставляем плейсхолдер перед найденным элементом
       if (this.#placeholder.nextSibling !== targetElement) {
         this.element.insertBefore(this.#placeholder, targetElement);
       }
     } else {
-    // Если не нашли элемент (курсор ниже всех элементов), вставляем в конец
+      // Если не нашли элемент (курсор ниже всех элементов), вставляем в конец
       if (this.#placeholder.nextSibling !== null) {
         this.element.appendChild(this.#placeholder);
       }
@@ -136,6 +217,24 @@ export default class SortableList extends Component {
     this.#draggingElement.style.top = '';
     this.#draggingElement.style.width = '';
     this.#draggingElement.style.margin = '';
+
+    // Обновляем порядок элементов в #items после перетаскивания
+    const allChildren = Array.from(this.element.children);
+    const placeholderIndex = allChildren.indexOf(this.#placeholder);
+    const draggingIndex = allChildren.indexOf(this.#draggingElement);
+    
+    if (placeholderIndex !== -1 && draggingIndex !== -1) {
+      // Создаем новый массив без плейсхолдера и с правильным порядком
+      const newOrder = allChildren.filter(child => 
+        child !== this.#placeholder && child !== this.#draggingElement
+      );
+      
+      // Вставляем перетаскиваемый элемент на место плейсхолдера
+      newOrder.splice(placeholderIndex, 0, this.#draggingElement);
+      
+      // Обновляем #items
+      this.#items = newOrder;
+    }
 
     this.element.insertBefore(this.#draggingElement, this.#placeholder);
     this.#placeholder.remove();
