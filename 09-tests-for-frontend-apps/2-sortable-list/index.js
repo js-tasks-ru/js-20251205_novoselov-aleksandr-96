@@ -9,9 +9,14 @@ export default class SortableList extends Component {
   #onPointerUp = null;
 
   constructor({ items = [] } = {}) {
-    super('ul');
-    this.#items = [...items];
+    super();
+    this.#items = items;
     this.render();
+    this.#initListeners();
+  }
+
+  render() {
+    this.html = `<ul class="sortable-list">${this.#template()}</ul>`;
   }
 
   #template() {
@@ -22,12 +27,8 @@ export default class SortableList extends Component {
     }).join('');
   }
 
-  render() {
-    this.html = `<ul class="sortable-list">${this.#template()}</ul>`;
-    this.#initEvents();
-  }
 
-  #initEvents() {
+  #initListeners() {
     this.element.addEventListener('pointerdown', (e) => {
       const deleteHandle = e.target.closest('[data-delete-handle]');
       const grabHandle = e.target.closest('[data-grab-handle]');
