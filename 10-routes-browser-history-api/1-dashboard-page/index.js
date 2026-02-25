@@ -22,6 +22,7 @@ export default class Page extends Component {
   async render() {
     this.#rangePicker = new RangePicker();
     this.element.querySelector('[data-element="rangePicker"]').append(this.#rangePicker.element);
+    this.subElements.rangePicker = this.#rangePicker.element;
 
     this.#sortableTable = new SortableTable(header, {
       url: 'api/dashboard/bestsellers',
