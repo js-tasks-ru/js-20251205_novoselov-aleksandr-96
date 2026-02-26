@@ -45,7 +45,6 @@ export default class RangePicker extends Component {
     this.#boundDocumentClickHandler = this.documentClickHandler.bind(this);
 
     this.#initListeners();
-    this.#dispatchDateSelect();
   }
 
   render() {
@@ -149,11 +148,7 @@ export default class RangePicker extends Component {
     this.updateSelection();
 
     // Диспатчим событие только если выбран полный диапазон
-    this.#dispatchDateSelect();
-  }
-
-  #dispatchDateSelect() {
-    if (this.from && this.to) {
+      if (this.from && this.to) {
       this.element.dispatchEvent(new CustomEvent('date-select', {
         bubbles: true,
         detail: { from: this.from, to: this.to }
