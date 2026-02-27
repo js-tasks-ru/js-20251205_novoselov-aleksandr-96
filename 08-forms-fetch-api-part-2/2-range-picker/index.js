@@ -125,22 +125,25 @@ export default class RangePicker extends Component {
   }
 
   selectDate(date) {
+    // Создаём дату с временем 12:00, чтобы избежать сдвига при конвертации
+    const safeDate = new Date((new Date(date)).setHours(12, 0, 0));
+
     if (!this.from && !this.to) {
       // Нет выбора — устанавливаем from
-      this.from = date;
+      this.from = safeDate;
     } else if (this.from && !this.to) {
       // Есть только from
-      if (date < this.from) {
+      if (safeDate < this.from) {
         // Дата раньше from — меняем их местами
         this.to = this.from;
-        this.from = date;
+        this.from = safeDate;
       } else {
         // Дата такая же или позже — устанавливаем to
-        this.to = date;
+        this.to = safeDate;
       }
     } else {
       // Есть полный диапазон — начинаем новый выбор
-      this.from = date;
+      this.from = safeDate;
       this.to = null;
     }
 
