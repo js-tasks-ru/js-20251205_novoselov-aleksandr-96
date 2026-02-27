@@ -27,7 +27,7 @@ export default class SortableTable extends Component {
   constructor(headerConfig = [], {
     url = '',
     data = [],
-    isSortLocally = false,
+    isSortLocally = true,
     from = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000), // 30 дней, включая сегодня
     to = new Date()
   } = {}) {
@@ -56,7 +56,7 @@ export default class SortableTable extends Component {
 
     this.arrowHandler(this.#sorted.id, this.#sorted.order);
 
-    if (this.#url && !this.#isSortLocally) {
+    if (this.#url) {
       this.#loadPromise = this.loadData().catch(() => {});
     }
 
