@@ -28,7 +28,7 @@ export default class SortableTable extends Component {
     url = '',
     data = [],
     isSortLocally = false,
-    from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), //29 дней назад
+    from = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString(), // 30 дней, включая сегодня
     to = new Date().toISOString()
   } = {}) {
     super();

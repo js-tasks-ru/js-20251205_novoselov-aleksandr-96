@@ -19,7 +19,7 @@ export default class RangePicker extends Component {
       const today = new Date();
       this.to = today;
       this.from = new Date(today);
-      this.from.setDate(today.getDate() - 29); // 30 дней включая сегодня
+      this.from.setDate(today.getDate() - 29); // 30 дней, включая сегодня
     } else {
       this.from = from ?? this.from;
       this.to = to ?? this.to;
