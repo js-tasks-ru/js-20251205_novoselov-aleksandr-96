@@ -17,24 +17,33 @@ export default class SortableTable extends Component {
   #isLoading = false;
   #url = null;
   #start = 0;
-  #end = 20;
+  #end = 30;
   #scrollHandler = null;
-  #step = 20;
+  #step = 30;
   #loadPromise = null;
+  #from = null;
+  #to = null;
 
   constructor(headerConfig = [], {
     url = '',
     data = [],
-    isSortLocally = false
+    isSortLocally = false,
+    from = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000), // 30 дней, включая сегодня
+    to = new Date()
   } = {}) {
     super();
     this.#headerConfig = headerConfig;
     this.#data = data;
-    this.#sorted = this.#headerConfig.find(item => item.sortable)?.id;
+    this.#sorted = {
+      id: this.#headerConfig.find(item => item.sortable)?.id,
+      order: 'asc',
+    };
     this.#isSortLocally = isSortLocally;
     this.#url = url;
     this.#start = 0;
     this.#end = this.#step;
+    this.#from = from;
+    this.#to = to;
 
     this.#createArrow();
     this.html = this.template();
@@ -47,11 +56,13 @@ export default class SortableTable extends Component {
 
     this.arrowHandler(this.#sorted.id, this.#sorted.order);
 
-    if (this.#url && !this.#isSortLocally) {
+    // ← Загружаем данные при наличии URL
+    if (this.#url) {
       this.#loadPromise = this.loadData().catch(() => {});
     }
 
-    if (this.#isSortLocally && this.#data.length > 0) {
+    // ← Если переданы локальные данные без URL, сортируем их
+    if (this.#isSortLocally && this.#data.length > 0 && !this.#url) {
       this.sortOnClient(this.#sorted.id, this.#sorted.order);
     }
   }
@@ -61,10 +72,12 @@ export default class SortableTable extends Component {
       await this.#loadPromise;
     }
     
-    if (this.#url && !this.#isSortLocally && this.#data.length === 0) {
+    // ← Если URL есть, но данных ещё нет — загружаем
+    if (this.#url && this.#data.length === 0) {
       await this.loadData();
     }
 
+    // ← Локальная сортировка данных после загрузки
     if (this.#isSortLocally && this.#data.length > 0) {
       this.sortOnClient(this.#sorted.id, this.#sorted.order);
     }
@@ -75,10 +88,11 @@ export default class SortableTable extends Component {
   }
 
   async loadData(append = false) {
-    if (this.#isLoading) {return this.#data;}
+    if (this.#isLoading) { return this.#data; }
     
     this.#isLoading = true;
     this.#toggleLoader();
+    this.#hideBody();
 
     try {
       const params = new URLSearchParams({
@@ -87,6 +101,15 @@ export default class SortableTable extends Component {
         _start: append ? this.#start : 0,
         _end: append ? this.#end : this.#step
       });
+
+      if (!append) {
+        if (this.#from) {
+          params.append('from', this.#from.toISOString());
+        }
+        if (this.#to) {
+          params.append('to', this.#to.toISOString());
+        }
+      }
 
       const url = `${BACKEND_URL}/${this.#url}?${params}`;
       const data = await fetchJson(url);
@@ -110,6 +133,7 @@ export default class SortableTable extends Component {
     } finally {
       this.#isLoading = false;
       this.#toggleLoader();
+      this.#showBody();
       this.#updateEmptyState();
     }
   }
@@ -120,9 +144,16 @@ export default class SortableTable extends Component {
     }
   }
 
-  #updateEmptyState = () => {
-    if (!this.#sortableTable) {return;}
+  #hideBody() {
+    this.#bodyElement.style.display = 'none';
+  }
 
+  #showBody() {
+    this.#bodyElement.style.display = '';
+  }
+
+  #updateEmptyState = () => {
+    if (!this.#sortableTable) { return; }
     if (!this.#isLoading && this.#data.length === 0) {
       this.#sortableTable.classList.add('sortable-table_empty');
     } else {
@@ -131,8 +162,7 @@ export default class SortableTable extends Component {
   }
 
   #headerColumns() {
-    if (!this.#headerConfig?.length) {return '';}
-    
+    if (!this.#headerConfig?.length) { return ''; }
     return this.#headerConfig.map(column => {
       const order = column.id === this.#sorted.id ? this.#sorted.order : 'asc';
       return `
@@ -147,8 +177,7 @@ export default class SortableTable extends Component {
   }
 
   #bodyColumns() {
-    if (!this.#headerConfig?.length || !this.#data?.length) {return '';}
-    
+    if (!this.#headerConfig?.length || !this.#data?.length) { return ''; }
     return this.#data.map(item => {
       return `
         <a href="#" class="sortable-table__row">
@@ -180,24 +209,32 @@ export default class SortableTable extends Component {
     if (this.#headerElement) {
       this.#headerElement.addEventListener('pointerdown', this.headerClickHandler);
     }
-    
+
     this.#scrollHandler = this.#onScroll.bind(this);
     window.addEventListener('scroll', this.#scrollHandler);
+  }
+
+  async updateDateAndLoadData(from, to) {
+    this.#from = from;
+    this.#to = to;
+    this.#start = 0;
+    this.#end = this.#step;
+    this.#isLoading = false;
+    await this.loadData();
   }
 
   #removeListeners() {
     if (this.#headerElement) {
       this.#headerElement.removeEventListener('pointerdown', this.headerClickHandler);
     }
-    
+
     if (this.#scrollHandler) {
       window.removeEventListener('scroll', this.#scrollHandler);
     }
   }
 
   #onScroll = () => {
-    if (this.#isLoading || this.#isSortLocally || !this.#url) {return;}
-    
+    if (this.#isLoading || this.#isSortLocally || !this.#url) { return; }
     const scrollHeight = document.documentElement.scrollHeight;
     const scrollTop = document.documentElement.scrollTop;
     const clientHeight = document.documentElement.clientHeight;
@@ -235,7 +272,7 @@ export default class SortableTable extends Component {
       const id = cell.dataset.id;
       const currentOrder = cell.dataset.order;
       const order = currentOrder === 'asc' ? 'desc' : 'asc';
-      
+
       this.#sorted = { id, order };
       this.sort();
     }
@@ -243,10 +280,10 @@ export default class SortableTable extends Component {
 
   sortHandler = (fieldValue, orderValue) => {
     this.arrowHandler(fieldValue, orderValue);
-    
+
     const column = this.#headerConfig.find(item => item.id === fieldValue);
     const sortType = column?.sortType || 'string';
-    
+
     this.#data = sortObjects(this.#data, fieldValue, sortType, orderValue);
     this.#updateBodyColumns();
   }
@@ -290,7 +327,7 @@ export default class SortableTable extends Component {
   }
 
   destroy() {
-    super.destroy();
     this.#removeListeners();
+    super.destroy();
   }
 }
