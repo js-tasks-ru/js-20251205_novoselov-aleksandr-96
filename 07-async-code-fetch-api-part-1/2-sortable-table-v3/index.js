@@ -21,11 +21,15 @@ export default class SortableTable extends Component {
   #scrollHandler = null;
   #step = 30;
   #loadPromise = null;
+  #from = null;
+  #to = null;
 
   constructor(headerConfig = [], {
     url = '',
     data = [],
-    isSortLocally = false
+    isSortLocally = false,
+    from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), //29 дней назад
+    to = new Date().toISOString()
   } = {}) {
     super();
     this.#headerConfig = headerConfig;
@@ -38,6 +42,8 @@ export default class SortableTable extends Component {
     this.#url = url;
     this.#start = 0;
     this.#end = this.#step;
+    this.#from = from;
+    this.#to = to;
 
     this.#createArrow();
     this.html = this.template();
@@ -90,6 +96,15 @@ export default class SortableTable extends Component {
         _start: append ? this.#start : 0,
         _end: append ? this.#end : this.#step
       });
+
+      if (!append) {
+        if (this.#from) {
+          params.append('from', this.#from);
+        }
+        if (this.#to) {
+          params.append('to', this.#to);
+        }
+      }
 
       const url = `${BACKEND_URL}/${this.#url}?${params}`;
       const data = await fetchJson(url);
